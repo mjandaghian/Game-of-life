@@ -6,15 +6,57 @@ x=0
 y=0
 declare -a xarr
 declare -a yarr
+declare -a xarr_temp
+declare -a yarr_temp
 count=0
 
 #### Utility functions ####
 
 simulate(){
- echo "sim"
- #this is where the conway's algo goes
+    
+    for i in {0..10}; do 
+        for j in {0..10}; do 
+            local point_count
+            point_count=0
+            for (( i_temp=$(( i - 1)) ; i_temp<=$(( i + 1 )); i_temp++ )); do 
+                for (( j_temp=$((j - 1)); j_temp<=$(( j + 1)); j_temp++)); do 
+                    if point_on_grid ${i_temp} ${j_temp}; then
+                        ((point_count++))
+                        
+                    fi 
+                    
+                    
+                done
+            done 
+            if point_on_grid $i $j; then
+                ((point_count--))
+                if [[ ($point_count -eq 3) || ($point_count -eq 2) ]]; then 
+                yarr_temp+=($i)
+                xarr_temp+=($j)
+                fi 
+            else
+                if [[ $point_count -eq 3 ]]; then 
+                yarr_temp+=($i)
+                xarr_temp+=($j)
+                fi 
+            fi 
+            
+            
+            
+        done
+    done
+    
+    unset xarr
+    unset yarr
+    for index in ${!xarr_temp[@]}; do 
+        xarr[$index]=${xarr_temp[$index]}
+        yarr[$index]=${yarr_temp[$index]}
+    done 
+    unset xarr_temp
+    unset yarr_temp
+   
+    
 }
-
 
 print_grid(){
     echo -n "$(tput clear)" #used to clear the screen
@@ -54,7 +96,7 @@ print_grid(){
 
 point_on_grid(){
     for (( k=0; k<${count}; k++ )); do 
-        if [[ $1 -eq ${yarr[$k]} ]]; then
+        if [[ $1 == ${yarr[$k]} ]]; then
             if [[ $2 -eq ${xarr[$k]} ]]; then 
                 return 0 #true
             fi 
@@ -62,6 +104,7 @@ point_on_grid(){
     done 
     return 1 #false
 } 
+
 
 
 #### User interface ####
@@ -111,7 +154,9 @@ while true; do
             ;;
             
         o) 
-           
+            if point_on_grid $y $x; then 
+                continue
+            fi 
             xarr+=($x)
             yarr+=($y)
             ((count++))
@@ -124,10 +169,15 @@ while true; do
         
     esac
 done 
-exit
-#print_grid $x $y $xarr $yarr $print the grid 
 
-#simulate $xarr $yarr 
+while true; do 
+    simulate 
+    sleep 1
+    print_grid
+    
+    
+done
 
+        
         
     
