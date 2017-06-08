@@ -6,6 +6,7 @@ x=0
 y=0
 declare -a xarr
 declare -a yarr
+count=0
 
 #### Utility functions ####
 
@@ -16,16 +17,54 @@ simulate(){
 
 
 print_grid(){
-    #use groff for markup 
-    for i in {1..1000}; do
-    printf "\b"
-    done
-    echo -n "Grid is printed with x=$x, y=$y, xarr=${xarr[@]}, yarr=${yarr[@]}" 
+    echo -n "$(tput clear)" #used to clear the screen
+    printf "+-----------------------+\n"
+    for i in {0..10}; do 
+        for j in {0..10}; do  
+            if point_on_grid $i $j ; then 
+            
+                if [[ $j -eq 10 ]]; then 
+                    printf "o |\n"
+                else
+                    if [[ $j -eq 0 ]]; then     
+                        printf "| o "
+                    else
+                        
+                        printf "o "
+                    fi 
+                fi 
+            else
+                if [[ $j -eq 10 ]]; then 
+                    printf "  |\n"
+                else
+                    if [[ $j -eq 0 ]]; then 
+                        printf "|   "
+                    else
+                    
+                        printf "  " 
+                    fi 
+                fi 
+            fi 
+        done
+    done 
+            
+    printf "+-----------------------+\n"
+
 }
 
+point_on_grid(){
+    for (( k=0; k<${count}; k++ )); do 
+        if [[ $1 -eq ${yarr[$k]} ]]; then
+            if [[ $2 -eq ${xarr[$k]} ]]; then 
+                return 0 #true
+            fi 
+        fi 
+    done 
+    return 1 #false
+} 
 
 
-#### Setting up the grid ####
+#### User interface ####
 
 while true; do
     print_grid #print the grid
@@ -72,8 +111,10 @@ while true; do
             ;;
             
         o) 
+           
             xarr+=($x)
             yarr+=($y)
+            ((count++))
             continue
             ;;
         
